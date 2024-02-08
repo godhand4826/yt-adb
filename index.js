@@ -1,49 +1,31 @@
 const $ = (q) => document.querySelector(q);
 const $$ = (q) => document.querySelectorAll(q);
-const log = (...msg) => console.log('[YT Ad Blocker]', ...msg);
+const log = (...msg) => console.log('[yt-adb]', ...msg);
 
 handleAds();
 autoSetupVideoAdObserver();
 
 function autoSetupVideoAdObserver() {
-  function setup() {
-    log('setup video ads observer');
-    if (registerVideoAdObserver()) {
-      log('setup successful');
-      return true;
-    } else {
-      log('setup failed');
-      return false;
-    }
-  }
-
-  if (setup()) return;
-
-  log('retry every 5 seconds');
-  const id = setInterval(() => {
-    if (setup()) {
-      clearInterval(id);
-    }
-  }, 5000);
+  const stop = observe(
+    $('body'),
+    debounce(() => {
+      if ($('.video-ads')) {
+        registerVideoAdObserver();
+        stop();
+      } else {
+        log('.video-ads not found');
+      }
+    }),
+  );
 }
 
 function registerVideoAdObserver() {
   log('register video ads observer');
-  const videoAds = $('.video-ads');
-
-  if (!videoAds) {
-    log('register video ads observer failed: video ads element not found');
-    return false;
-  }
 
   handleAds();
-  observe(videoAds, () => {
-    log('video ads changed');
-    handleAds();
-  });
+  observe($('.video-ads'), () => handleAds());
 
   log('register video ads observer successful');
-  return true;
 }
 
 function handleAds() {
@@ -54,7 +36,7 @@ function handleAds() {
 function hideStaticAds() {
   log('hide static ads');
 
-  const staticAds = [
+  const adsSelectors = [
     '.ytd-companion-slot-renderer',
     '.ytd-action-companion-ad-renderer',
     '.ytd-watch-next-secondary-results-renderer.sparkles-light-cta',
@@ -72,32 +54,52 @@ function hideStaticAds() {
     '.ytd-banner-promo-renderer',
     '.ytd-video-masthead-ad-v3-renderer',
     '.ytd-primetime-promo-renderer',
-  ].map((q) => q.concat(':not([style*="display: none"])'));
+  ];
 
-  const ads = $$(staticAds.join(', '));
-  ads.forEach((ad) => {
-    log('hide ad', ad);
+  let count = 0;
+  $$(
+    adsSelectors.map((q) => `${q}:not([style*="display: none"])`).join(','),
+  ).forEach((ad) => {
     ad.style.display = 'none';
+    count += 1;
   });
-  log(`${ads.length} static ads hidden`);
+  log(`${count} static ads hidden`);
 }
 
 function fastForwardVideoAds() {
-  if ($('.video-ads')?.innerHTML) {
-    log('fast forward video ads');
-    const player = $('.video-stream');
+  const videoContainer = document.getElementById('movie_player');
+  const isAd =
+    videoContainer?.classList.contains('ad-interrupting') ||
+    videoContainer?.classList.contains('ad-showing');
+  if (!isAd) {
+    return;
+  }
+
+  log('fast forward video ads');
+
+  const player = $('.video-stream');
+  if (player) {
     player.muted = true;
     player.currentTime = player.duration - 0.1;
     player.paused && player.play();
-
-    $('.ytp-ad-skip-button')?.click();
-    $('.ytp-ad-skip-button-modern')?.click();
   }
+
+  $('.ytp-ad-skip-button')?.click();
+  $('.ytp-ad-skip-button-modern')?.click();
 }
 
 function observe(target, callback) {
   const observer = new MutationObserver(callback);
   const config = { attributes: true, childList: true, characterData: true };
   observer.observe(target, config);
-  // observer.disconnect();
+
+  return () => observer.disconnect();
+}
+
+function debounce(callback, time = 200) {
+  let debounceTimer;
+  return () => {
+    window.clearTimeout(debounceTimer);
+    debounceTimer = window.setTimeout(callback, time);
+  };
 }
