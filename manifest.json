@@ -3,5 +3,6 @@
   "name": "youtube ad blocker",
   "description": "this chrome extension blocks ads on YouTube.",
   "version": "1.0",
+  "action": { "default_icon": "icon.png" },
   "content_scripts": [ { "js": ["index.js"], "matches": ["https://www.youtube.com/*"] } ]
 }
