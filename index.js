@@ -2,21 +2,26 @@ const $ = (q) => document.querySelector(q);
 const $$ = (q) => document.querySelectorAll(q);
 const log = (...msg) => console.log('[yt-adb]', ...msg);
 
-handleAds();
 autoSetupVideoAdObserver();
 
 function autoSetupVideoAdObserver() {
-  const stop = observe(
-    $('body'),
-    debounce(() => {
-      if ($('.video-ads')) {
-        registerVideoAdObserver();
-        stop();
-      } else {
-        log('.video-ads not found');
-      }
-    }),
-  );
+  let registered = false;
+  function setup() {
+    if (registered) {
+      return;
+    }
+
+    if ($('.video-ads')) {
+      registerVideoAdObserver();
+      registered = true;
+    } else {
+      log('.video-ads not found');
+      handleAds();
+    }
+  }
+
+  setup();
+  observe($('body'), () => setup());
 }
 
 function registerVideoAdObserver() {
@@ -80,7 +85,10 @@ function fastForwardVideoAds() {
   const player = $('.video-stream');
   if (player) {
     player.muted = true;
-    player.currentTime = player.duration - 0.1;
+    // fast forward if media is avaliable and media length is known
+    if (!isNaN(player.duration) && player.duration != Infinity) {
+      player.currentTime = player.duration - 0.001;
+    }
     player.paused && player.play();
   }
 
