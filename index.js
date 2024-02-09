@@ -43,7 +43,7 @@ function hideStaticAds() {
     '.ytd-unlimited-offer-module-renderer',
     '.ytp-ad-overlay-image',
     '.ytp-ad-text-overlay',
-    'div#masthead-ad.style-scope.ytd-rich-grid-renderer',
+    '#masthead-ad.style-scope.ytd-rich-grid-renderer',
     'div#root.style-scope.ytd-display-ad-renderer.yt-simple-endpoint',
     'div#sparkles-container.style-scope.ytd-promoted-sparkles-web-renderer',
     '.ytd-display-ad-renderer',
@@ -96,7 +96,7 @@ function observe(target, callback) {
   return () => observer.disconnect();
 }
 
-function debounce(callback, time = 200) {
+function debounce(callback, time = 800) {
   let debounceTimer;
   return () => {
     window.clearTimeout(debounceTimer);
