@@ -1,8 +1,11 @@
 ## ⏩ YT-ADB: YouTube Ad Blocker
+[![en](https://img.shields.io/badge/lang-en-green.svg)](./README.en.md)
+[![zh](https://img.shields.io/badge/lang-zh-green.svg)](./README.md)
 
 YT-ADB 是一個專為 Google Chrome 瀏覽器設計的擴充套件，用於阻擋 YouTube 的廣告。
 
 ### 📝 功能說明
+
 YT-ADB 主要功能是阻擋 YouTube 的廣告，讓您可以專心觀看影片，不再被廣告打擾。
 
 ### 🚀 安裝步驟
